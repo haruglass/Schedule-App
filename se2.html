@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dark Planner Pro</title>
+    <title>Dark Planner SE2</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
     <style>
         :root { 
             --bg: #121212; --card-bg: #2c2c2c; --border: #444444; 
-            --text: #ffffff; --accent: #aaaaaa; --time-w: 36px; 
+            --text: #ffffff; --accent: #aaaaaa; --time-w: 34px; 
         }
         
         html, body { 
@@ -27,45 +27,44 @@
             padding-top: env(safe-area-inset-top); box-sizing: border-box;
         }
         
-        #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; flex: 1 1 auto; overflow: hidden; }
+        #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; padding: 1px; flex: 1 1 auto; overflow: hidden; }
         
-        /* 1コマの高さを拡大 */
-        .time-slot { height: 4.5vh; min-height: 36px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
-        .time-label { width: var(--time-w); font-size: 10px; color: #aaa; display: flex; align-items: flex-start; padding: 2px 0 0 2px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
+        /* SE2の16:9画面で23:30まで収めるための極限設定(3.75vh) */
+        .time-slot { height: 3.75vh; min-height: 28px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
+        .time-label { width: var(--time-w); font-size: 9px; color: #aaa; display: flex; align-items: flex-start; padding: 1px 0 0 1px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
         .slot-content { flex: 1; position: relative; border-right: 1px solid var(--border); }
 
         .task-card { 
             position: absolute; top: 1px; left: 1px; right: 1px; 
             background: var(--card-bg); border: 1px solid var(--accent); 
-            border-radius: 4px; z-index: 10; font-size: 11px; font-weight: bold;
+            border-radius: 3px; z-index: 10; font-size: 10px; font-weight: bold;
             display: flex; align-items: center; justify-content: center; 
             color: var(--text); touch-action: none; user-select: none;
         }
-        .handle-b { position: absolute; left: 0; right: 0; bottom: 0; height: 12px; z-index: 20; background: rgba(255,255,255,0.08); }
+        .handle-b { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; z-index: 20; background: rgba(255,255,255,0.08); }
 
-        #input-area { padding: 4px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
-        #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-        .field-set { display: flex; gap: 2px; border: 1px solid var(--border); padding: 2px; background: #1e1e1e; border-radius: 4px; }
-        select, input, textarea { background: #2c2c2c; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; outline: none; }
-        textarea { width: 100%; height: 42px; padding: 4px; box-sizing: border-box; resize: none; border-radius: 4px; }
+        #input-area { padding: 2px 4px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+        #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+        .field-set { display: flex; gap: 1px; border: 1px solid var(--border); padding: 1px; background: #1e1e1e; border-radius: 4px; }
+        select, input, textarea { background: #2c2c2c; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 10px; outline: none; }
+        textarea { width: 100%; height: 32px; padding: 3px; box-sizing: border-box; resize: none; border-radius: 4px; }
 
-        /* パレットを2段の並べる方式に変更 */
         #palette { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
-            gap: 6px; 
-            padding: 8px; 
+            gap: 4px; 
+            padding: 4px 6px; 
             background: var(--bg); 
             border-top: 1px solid var(--border);
-            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            padding-bottom: calc(4px + env(safe-area-inset-bottom));
             flex-shrink: 0;
         }
         .source-card { 
-            padding: 8px 0; 
+            padding: 5px 0; 
             background: var(--card-bg); 
             border: 1px solid var(--border); 
-            border-radius: 6px; 
-            font-size: 13px; 
+            border-radius: 4px; 
+            font-size: 11px; 
             text-align: center;
             color: var(--text); 
         }
@@ -73,11 +72,11 @@
         .dragging { 
             position: fixed; pointer-events: none; z-index: 100; opacity: 0.9; 
             background: var(--card-bg); border: 1px solid var(--accent); 
-            width: 70px; height: 30px; display: flex; align-items: center; justify-content: center;
-            border-radius: 6px; color: var(--text); font-size: 13px; font-weight: bold;
+            width: 55px; height: 24px; display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; color: var(--text); font-size: 11px; font-weight: bold;
         }
         
-        #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text); }
+        #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text); }
     </style>
 </head>
 <body>
@@ -102,7 +101,7 @@
 
 <script>
     // 【重要】ここにGASのウェブアプリURLを貼り付けてください
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxSYPoET92hYdTsW6u6YFTdUpLVMsoQnCH4_kjpMGkiogYLQs8WnZAmG0mRlZFkBFd31w/exec";
+    const GAS_URL = "ここにウェブアプリURLを貼り付け";
 
     let dragItem = null, lastTap = 0, syncTimer = null;
     const SLOT_H = () => document.querySelector('.time-slot').offsetHeight;
@@ -125,13 +124,13 @@
                 const my = isT ? e.touches[0].pageY : e.pageY;
                 dragItem = document.createElement('div');
                 dragItem.className = 'dragging'; dragItem.innerText = label;
-                dragItem.style.left = (mx - 35) + 'px'; dragItem.style.top = (my - 15) + 'px';
+                dragItem.style.left = (mx - 27) + 'px'; dragItem.style.top = (my - 12) + 'px';
                 document.body.appendChild(dragItem);
                 const move = (ev) => {
                     if(!dragItem) return;
                     const ex = isT ? ev.touches[0].pageX : ev.pageX;
                     const ey = isT ? ev.touches[0].pageY : ev.pageY;
-                    dragItem.style.left = (ex - 35) + 'px'; dragItem.style.top = (ey - 15) + 'px';
+                    dragItem.style.left = (ex - 27) + 'px'; dragItem.style.top = (ey - 12) + 'px';
                     if(isT && ev.cancelable) ev.preventDefault();
                 };
                 const end = (ev) => {
@@ -163,7 +162,7 @@
     function createTaskCard(parent, label, num) {
         const card = document.createElement('div');
         card.className = 'task-card'; card.innerText = label; card.dataset.slots = num;
-        card.style.height = `calc(${SLOT_H()}px * ${num} - 3px)`;
+        card.style.height = `calc(${SLOT_H()}px * ${num} - 2px)`;
         const handleDel = (e) => {
             if (e.target.className.includes('handle-b')) return;
             const now = Date.now();
@@ -184,7 +183,7 @@
                     const next = document.querySelector(`[data-index="${startIdx + i}"]`);
                     if(!next || next.children.length > 0) { can = false; break; }
                 }
-                if(can){ card.style.height = `calc(${SLOT_H()}px * ${newS} - 3px)`; card.dataset.slots = newS; }
+                if(can){ card.style.height = `calc(${SLOT_H()}px * ${newS} - 2px)`; card.dataset.slots = newS; }
             };
             const end = () => { window.removeEventListener('touchmove', move); window.removeEventListener('touchend', end); sync(); };
             window.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', end);
