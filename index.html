@@ -12,7 +12,7 @@
     <style>
         :root { 
             --bg: #121212; --card-bg: #2c2c2c; --border: #444444; 
-            --text: #ffffff; --accent: #aaaaaa; --time-w: 32px; 
+            --text: #ffffff; --accent: #aaaaaa; --time-w: 36px; 
         }
         
         html, body { 
@@ -27,45 +27,57 @@
             padding-top: env(safe-area-inset-top); box-sizing: border-box;
         }
         
-        #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; flex: 0 0 auto; }
+        #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; flex: 1 1 auto; overflow: hidden; }
         
-        /* 縦の短いSE2に合わせつつ、Pixel3でも綺麗に見える高さ */
-        .time-slot { height: 4.1vh; min-height: 32px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
-        .time-label { width: var(--time-w); font-size: 8px; color: #999; display: flex; align-items: flex-start; padding: 1px 0 0 1px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
+        /* 1コマの高さを拡大 */
+        .time-slot { height: 4.5vh; min-height: 36px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
+        .time-label { width: var(--time-w); font-size: 10px; color: #aaa; display: flex; align-items: flex-start; padding: 2px 0 0 2px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
         .slot-content { flex: 1; position: relative; border-right: 1px solid var(--border); }
 
         .task-card { 
             position: absolute; top: 1px; left: 1px; right: 1px; 
             background: var(--card-bg); border: 1px solid var(--accent); 
-            border-radius: 4px; z-index: 10; font-size: 10px; 
+            border-radius: 4px; z-index: 10; font-size: 11px; font-weight: bold;
             display: flex; align-items: center; justify-content: center; 
             color: var(--text); touch-action: none; user-select: none;
         }
-        .handle-b { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; z-index: 20; background: rgba(255,255,255,0.05); }
+        .handle-b { position: absolute; left: 0; right: 0; bottom: 0; height: 12px; z-index: 20; background: rgba(255,255,255,0.08); }
 
-        #input-area { padding: 2px 4px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; }
-        #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+        #input-area { padding: 4px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+        #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
         .field-set { display: flex; gap: 2px; border: 1px solid var(--border); padding: 2px; background: #1e1e1e; border-radius: 4px; }
-        select, input, textarea { background: #2c2c2c; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 11px; outline: none; }
-        
-        /* メモ欄を限界までコンパクトに */
-        textarea { width: 100%; height: 40px; padding: 4px; box-sizing: border-box; resize: none; border-radius: 4px; }
+        select, input, textarea { background: #2c2c2c; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; outline: none; }
+        textarea { width: 100%; height: 42px; padding: 4px; box-sizing: border-box; resize: none; border-radius: 4px; }
 
+        /* パレットを2段の並べる方式に変更 */
         #palette { 
-            display: flex; overflow-x: auto; align-items: center; 
-            padding: 6px 8px; background: var(--bg); gap: 6px; 
-            border-top: 1px solid var(--border); -webkit-overflow-scrolling: touch;
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 6px; 
+            padding: 8px; 
+            background: var(--bg); 
+            border-top: 1px solid var(--border);
             padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            flex-shrink: 0;
         }
-        .source-card { padding: 6px 12px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; flex-shrink: 0; color: var(--text); }
+        .source-card { 
+            padding: 8px 0; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 6px; 
+            font-size: 13px; 
+            text-align: center;
+            color: var(--text); 
+        }
         
         .dragging { 
             position: fixed; pointer-events: none; z-index: 100; opacity: 0.9; 
             background: var(--card-bg); border: 1px solid var(--accent); 
-            padding: 6px 12px; border-radius: 6px; color: var(--text); font-size: 12px;
+            width: 70px; height: 30px; display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; color: var(--text); font-size: 13px; font-weight: bold;
         }
         
-        #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--text); }
+        #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text); }
     </style>
 </head>
 <body>
@@ -89,6 +101,7 @@
 </div>
 
 <script>
+    // 【重要】ここにGASのウェブアプリURLを貼り付けてください
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxSYPoET92hYdTsW6u6YFTdUpLVMsoQnCH4_kjpMGkiogYLQs8WnZAmG0mRlZFkBFd31w/exec";
 
     let dragItem = null, lastTap = 0, syncTimer = null;
@@ -112,13 +125,13 @@
                 const my = isT ? e.touches[0].pageY : e.pageY;
                 dragItem = document.createElement('div');
                 dragItem.className = 'dragging'; dragItem.innerText = label;
-                dragItem.style.left = (mx - 30) + 'px'; dragItem.style.top = (my - 15) + 'px';
+                dragItem.style.left = (mx - 35) + 'px'; dragItem.style.top = (my - 15) + 'px';
                 document.body.appendChild(dragItem);
                 const move = (ev) => {
                     if(!dragItem) return;
                     const ex = isT ? ev.touches[0].pageX : ev.pageX;
                     const ey = isT ? ev.touches[0].pageY : ev.pageY;
-                    dragItem.style.left = (ex - 30) + 'px'; dragItem.style.top = (ey - 15) + 'px';
+                    dragItem.style.left = (ex - 35) + 'px'; dragItem.style.top = (ey - 15) + 'px';
                     if(isT && ev.cancelable) ev.preventDefault();
                 };
                 const end = (ev) => {
