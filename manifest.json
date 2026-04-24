@@ -1,14 +1,14 @@
 {
-  "short_name": "Planner",
-  "name": "Dark Planner Pro",
-  "display": "standalone",
+  "name": "スケジュールApp",
+  "short_name": "スケジュール",
   "start_url": "index.html",
+  "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2666/2666505.png",
-      "sizes": "512x512",
+      "src": "icon.png",
+      "sizes": "192x192",
       "type": "image/png"
     }
   ]
