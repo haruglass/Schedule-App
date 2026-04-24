@@ -11,93 +11,66 @@
     
     <style>
         :root { 
-            --bg: #121212; 
-            --card-bg: #2c2c2c; 
-            --border: #444444; 
-            --text: #ffffff; 
-            --accent: #aaaaaa; 
-            --time-w: 40px; 
+            --bg: #121212; --card-bg: #2c2c2c; --border: #444444; 
+            --text: #ffffff; --accent: #aaaaaa; --time-w: 32px; 
         }
         
         html, body { 
-            font-family: sans-serif; 
-            height: 100%; 
-            margin: 0; 
-            background: var(--bg); 
-            color: var(--text); 
-            overflow: hidden; 
-            position: fixed; 
-            width: 100%;
+            font-family: sans-serif; height: 100%; margin: 0; 
+            background: var(--bg); color: var(--text); 
+            overflow: hidden; position: fixed; width: 100%;
         }
         
         #container { 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            height: -webkit-fill-available;
-            position: relative; 
-            padding-top: env(safe-area-inset-top); 
-            box-sizing: border-box;
+            display: flex; flex-direction: column; height: 100vh; 
+            height: -webkit-fill-available; position: relative; 
+            padding-top: env(safe-area-inset-top); box-sizing: border-box;
         }
         
-        #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; flex: 0 0 auto; }
-        .time-slot { height: 4.5vh; min-height: 38px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
-        .time-label { width: var(--time-w); font-size: 9px; color: #999; display: flex; align-items: flex-start; padding: 2px 0 0 2px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
+        #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; flex: 0 0 auto; }
+        
+        /* 縦の短いSE2に合わせつつ、Pixel3でも綺麗に見える高さ */
+        .time-slot { height: 4.1vh; min-height: 32px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
+        .time-label { width: var(--time-w); font-size: 8px; color: #999; display: flex; align-items: flex-start; padding: 1px 0 0 1px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
         .slot-content { flex: 1; position: relative; border-right: 1px solid var(--border); }
 
         .task-card { 
             position: absolute; top: 1px; left: 1px; right: 1px; 
-            background: var(--card-bg); 
-            border: 1px solid var(--accent); 
-            border-radius: 4px; 
-            z-index: 10; 
-            font-size: 11px; 
+            background: var(--card-bg); border: 1px solid var(--accent); 
+            border-radius: 4px; z-index: 10; font-size: 10px; 
             display: flex; align-items: center; justify-content: center; 
-            color: var(--text); 
-            touch-action: none; 
-            user-select: none;
+            color: var(--text); touch-action: none; user-select: none;
         }
-        .handle-b { 
-            position: absolute; left: 0; right: 0; bottom: 0; height: 12px; 
-            z-index: 20; cursor: ns-resize;
-            background: rgba(255,255,255,0.05);
-        }
+        .handle-b { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; z-index: 20; background: rgba(255,255,255,0.05); }
 
-        #input-area { padding: 4px 6px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
-        #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-        .field-set { display: flex; gap: 2px; border: 1px solid var(--border); padding: 3px; background: #1e1e1e; border-radius: 4px; }
-        select, input, textarea { background: #2c2c2c; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; outline: none; }
-        textarea { width: 100%; height: 50px; padding: 6px; box-sizing: border-box; resize: none; border-radius: 4px; user-select: text; -webkit-user-select: text; }
+        #input-area { padding: 2px 4px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; }
+        #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+        .field-set { display: flex; gap: 2px; border: 1px solid var(--border); padding: 2px; background: #1e1e1e; border-radius: 4px; }
+        select, input, textarea { background: #2c2c2c; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 11px; outline: none; }
+        
+        /* メモ欄を限界までコンパクトに */
+        textarea { width: 100%; height: 40px; padding: 4px; box-sizing: border-box; resize: none; border-radius: 4px; }
 
         #palette { 
             display: flex; overflow-x: auto; align-items: center; 
-            padding: 8px 8px; background: var(--bg); gap: 8px; 
+            padding: 6px 8px; background: var(--bg); gap: 6px; 
             border-top: 1px solid var(--border); -webkit-overflow-scrolling: touch;
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
         }
-        .source-card { 
-            padding: 8px 14px; 
-            background: var(--card-bg); 
-            border: 1px solid var(--border); 
-            border-radius: 6px; 
-            font-size: 13px; 
-            flex-shrink: 0; 
-            color: var(--text); 
-        }
+        .source-card { padding: 6px 12px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; flex-shrink: 0; color: var(--text); }
         
         .dragging { 
             position: fixed; pointer-events: none; z-index: 100; opacity: 0.9; 
             background: var(--card-bg); border: 1px solid var(--accent); 
-            padding: 8px 14px; border-radius: 6px; color: var(--text); 
-            font-size: 13px; font-family: sans-serif;
+            padding: 6px 12px; border-radius: 6px; color: var(--text); font-size: 12px;
         }
         
-        #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text); font-family: sans-serif; }
+        #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--text); }
     </style>
 </head>
 <body>
 <div id="container">
-    <div id="loader">データを読み込み中...</div>
+    <div id="loader">読み込み中...</div>
     <div id="main-area">
         <div class="column" id="col-1"></div><div class="column" id="col-2"></div><div class="column" id="col-3"></div>
     </div>
@@ -107,7 +80,7 @@
                 for(let i=0; i<4; i++) document.write(`<div class="field-set"><select onchange="sync()"><option value=""></option><option>出発</option><option>料理</option><option>就寝</option><option>1階へ</option></select><input type="time" onchange="sync()"></div>`);
             </script>
         </div>
-        <textarea id="memo" oninput="debounceSync()"></textarea>
+        <textarea id="memo" oninput="debounceSync()" placeholder="メモ..."></textarea>
     </div>
     <div id="palette">
         <div class="source-card">食事</div><div class="source-card">外出</div><div class="source-card">バイト</div><div class="source-card">パソコン</div>
@@ -116,7 +89,6 @@
 </div>
 
 <script>
-    // 【重要】ここにGASのウェブアプリURLを貼り付けてください
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxSYPoET92hYdTsW6u6YFTdUpLVMsoQnCH4_kjpMGkiogYLQs8WnZAmG0mRlZFkBFd31w/exec";
 
     let dragItem = null, lastTap = 0, syncTimer = null;
@@ -138,51 +110,36 @@
                 const isT = e.type.includes('touch');
                 const mx = isT ? e.touches[0].pageX : e.pageX;
                 const my = isT ? e.touches[0].pageY : e.pageY;
-
                 dragItem = document.createElement('div');
                 dragItem.className = 'dragging'; dragItem.innerText = label;
-                dragItem.style.left = (mx - 40) + 'px'; dragItem.style.top = (my - 20) + 'px';
+                dragItem.style.left = (mx - 30) + 'px'; dragItem.style.top = (my - 15) + 'px';
                 document.body.appendChild(dragItem);
-
                 const move = (ev) => {
                     if(!dragItem) return;
                     const ex = isT ? ev.touches[0].pageX : ev.pageX;
                     const ey = isT ? ev.touches[0].pageY : ev.pageY;
-                    dragItem.style.left = (ex - 40) + 'px'; dragItem.style.top = (ey - 20) + 'px';
+                    dragItem.style.left = (ex - 30) + 'px'; dragItem.style.top = (ey - 15) + 'px';
                     if(isT && ev.cancelable) ev.preventDefault();
                 };
-
                 const end = (ev) => {
                     const ex = isT ? ev.changedTouches[0].pageX : ev.pageX;
                     const ey = isT ? ev.changedTouches[0].pageY : ev.pageY;
                     const target = document.elementFromPoint(ex, ey)?.closest('.slot-content');
-                    
-                    if (target) {
-                        const targetIdx = target.dataset.index;
-                        if (!isOccupied(targetIdx)) {
-                            createTaskCard(target, label, 1);
-                            sync();
-                        }
+                    if (target && target.children.length === 0) {
+                        createTaskCard(target, label, 1);
+                        sync();
                     }
-                    
                     if(dragItem) dragItem.remove(); dragItem = null;
                     window.removeEventListener(isT ? 'touchmove' : 'mousemove', move);
                     window.removeEventListener(isT ? 'touchend' : 'mouseup', end);
                 };
-                
                 window.addEventListener(isT ? 'touchmove' : 'mousemove', move, {passive: false});
                 window.addEventListener(isT ? 'touchend' : 'mouseup', end);
             };
-            
             card.addEventListener('touchstart', (e) => startDrag(e, card.innerText));
             card.addEventListener('mousedown', (e) => startDrag(e, card.innerText));
         });
         loadData();
-    }
-
-    function isOccupied(index) {
-        const target = document.querySelector(`[data-index="${index}"]`);
-        return target && target.children.length > 0;
     }
 
     function debounceSync() {
@@ -194,7 +151,6 @@
         const card = document.createElement('div');
         card.className = 'task-card'; card.innerText = label; card.dataset.slots = num;
         card.style.height = `calc(${SLOT_H()}px * ${num} - 3px)`;
-
         const handleDel = (e) => {
             if (e.target.className.includes('handle-b')) return;
             const now = Date.now();
@@ -202,45 +158,25 @@
             lastTap = now;
         };
         card.addEventListener('click', handleDel); card.addEventListener('touchend', handleDel);
-
-        const createResizer = () => {
-            const h = document.createElement('div'); h.className = 'handle-b';
-            const onStart = (e) => {
-                e.stopPropagation(); e.preventDefault();
-                const isT = e.type.includes('touch');
-                const startY = isT ? e.touches[0].pageY : e.pageY;
-                const startH = card.offsetHeight;
-                
-                const onMove = (ev) => {
-                    const my = isT ? ev.touches[0].pageY : ev.pageY;
-                    const diff = my - startY;
-                    const newS = Math.max(1, Math.round((startH + diff) / SLOT_H()));
-                    
-                    const startIdx = parseInt(card.parentElement.dataset.index);
-                    let canResize = true;
-                    for(let i=1; i<newS; i++){
-                        const nextSlot = document.querySelector(`[data-index="${startIdx + i}"]`);
-                        if(!nextSlot || nextSlot.children.length > 0) { canResize = false; break; }
-                    }
-                    
-                    if(canResize){
-                        card.style.height = `calc(${SLOT_H()}px * ${newS} - 3px)`; card.dataset.slots = newS;
-                    }
-                };
-                
-                const onEnd = () => {
-                    window.removeEventListener(isT ? 'touchmove' : 'mousemove', onMove);
-                    window.removeEventListener(isT ? 'touchend' : 'mouseup', onEnd);
-                    sync();
-                };
-                window.addEventListener(isT ? 'touchmove' : 'mousemove', onMove, {passive: false});
-                window.addEventListener(isT ? 'touchend' : 'mouseup', onEnd);
+        const h = document.createElement('div'); h.className = 'handle-b';
+        h.addEventListener('touchstart', (e) => {
+            e.stopPropagation(); e.preventDefault();
+            const startY = e.touches[0].pageY;
+            const startH = card.offsetHeight;
+            const move = (ev) => {
+                const newS = Math.max(1, Math.round((startH + (ev.touches[0].pageY - startY)) / SLOT_H()));
+                const startIdx = parseInt(card.parentElement.dataset.index);
+                let can = true;
+                for(let i=1; i<newS; i++){
+                    const next = document.querySelector(`[data-index="${startIdx + i}"]`);
+                    if(!next || next.children.length > 0) { can = false; break; }
+                }
+                if(can){ card.style.height = `calc(${SLOT_H()}px * ${newS} - 3px)`; card.dataset.slots = newS; }
             };
-            h.addEventListener('mousedown', onStart); h.addEventListener('touchstart', onStart);
-            return h;
-        };
-        card.appendChild(createResizer());
-        parent.appendChild(card);
+            const end = () => { window.removeEventListener('touchmove', move); window.removeEventListener('touchend', end); sync(); };
+            window.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', end);
+        });
+        card.appendChild(h); parent.appendChild(card);
     }
 
     async function sync() {
@@ -264,7 +200,7 @@
             const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({method: 'load'}) });
             const data = await res.json();
             if (data.tasks) {
-                data.tasks.sort((a, b) => parseInt(a.idx) - parseInt(b.idx)).forEach(t => {
+                data.tasks.sort((a,b)=>a.idx-b.idx).forEach(t => {
                     const p = document.querySelector(`[data-index="${t.idx}"]`);
                     if (p) createTaskCard(p, t.label, t.slots);
                 });
@@ -278,11 +214,7 @@
                 });
             }
             document.getElementById('memo').value = data.memo || "";
-        } catch (e) {
-            console.error(e);
-        } finally {
-            document.getElementById('loader').style.display = 'none';
-        }
+        } catch (e) { console.error(e); } finally { document.getElementById('loader').style.display = 'none'; }
     }
     window.onload = init;
 </script>
