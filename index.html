@@ -11,10 +11,18 @@
     
     <style>
         :root { 
-            --bg: #121212; --card-bg: #1e1e1e; --border: #333333; 
-            --text: #e0e0e0; --accent: #4dabf7; --time-w: 40px; 
+            /* デザインを白・グレー系統に変更 */
+            --bg: #121212; 
+            --card-bg: #2c2c2c; 
+            --border: #444444; 
+            --text: #ffffff; /* 文字色を完全な白に */
+            --accent: #aaaaaa; /* カードの枠線をグレーに */
+            --time-w: 40px; 
         }
+        
+        /* フォントをゴシック体で統一、画面全体の揺れ防止 */
         html, body { 
+            font-family: sans-serif; /* ゴシック体 */
             height: 100%; 
             margin: 0; 
             background: var(--bg); 
@@ -23,35 +31,47 @@
             position: fixed; 
             width: 100%;
         }
+        
         #container { 
             display: flex; 
             flex-direction: column; 
             height: 100vh; 
             height: -webkit-fill-available;
             position: relative; 
+            /* iPhone最上部のステータスバーとの被りを防止 */
+            padding-top: env(safe-area-inset-top); 
+            box-sizing: border-box;
         }
         
         #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; flex: 0 0 auto; }
-        /* 1コマの高さを少し縮めてパレットのスペースを確保 */
         .time-slot { height: 4.5vh; min-height: 38px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
-        .time-label { width: var(--time-w); font-size: 9px; color: #777; display: flex; align-items: flex-start; padding: 2px 0 0 2px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
+        .time-label { width: var(--time-w); font-size: 9px; color: #999; display: flex; align-items: flex-start; padding: 2px 0 0 2px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
         .slot-content { flex: 1; position: relative; border-right: 1px solid var(--border); }
 
+        /* タスクカードのデザイン修正 */
         .task-card { 
             position: absolute; top: 1px; left: 1px; right: 1px; 
-            background: var(--card-bg); border: 1.5px solid var(--accent); border-radius: 4px; 
-            z-index: 10; font-size: 11px; display: flex; align-items: center; justify-content: center; 
-            color: var(--accent); touch-action: none; cursor: grab;
+            background: var(--card-bg); 
+            border: 1px solid var(--accent); /* 枠線を細いグレーに */
+            border-radius: 4px; 
+            z-index: 10; 
+            font-size: 11px; 
+            display: flex; align-items: center; justify-content: center; 
+            color: var(--text); /* 文字を白に */
+            touch-action: none; 
+            user-select: none;
         }
-        .handle-t, .handle-b { position: absolute; left: 0; right: 0; height: 16px; z-index: 20; }
-        .handle-t { top: 0; cursor: ns-resize; }
-        .handle-b { bottom: 0; cursor: ns-resize; }
+        /* 伸ばすハンドルの視認性向上 */
+        .handle-b { 
+            position: absolute; left: 0; right: 0; bottom: 0; height: 12px; 
+            z-index: 20; cursor: ns-resize;
+            background: rgba(255,255,255,0.05); /* 伸ばせる場所をうっすら表示 */
+        }
 
         #input-area { padding: 4px 6px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
         #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-        .field-set { display: flex; gap: 2px; border: 1px solid var(--border); padding: 3px; background: var(--card-bg); border-radius: 4px; }
-        select, input, textarea { background: #2c2c2c; color: var(--text); border: 1px solid #444; border-radius: 2px; font-size: 12px; outline: none; }
-        /* メモ欄の高さを少し抑える */
+        .field-set { display: flex; gap: 2px; border: 1px solid var(--border); padding: 3px; background: #1e1e1e; border-radius: 4px; }
+        select, input, textarea { background: #2c2c2c; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; outline: none; }
         textarea { width: 100%; height: 50px; padding: 6px; box-sizing: border-box; resize: none; border-radius: 4px; user-select: text; -webkit-user-select: text; }
 
         #palette { 
@@ -60,9 +80,26 @@
             border-top: 1px solid var(--border); -webkit-overflow-scrolling: touch;
             padding-bottom: calc(15px + env(safe-area-inset-bottom));
         }
-        .source-card { padding: 8px 14px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; flex-shrink: 0; color: var(--accent); }
-        .dragging { position: fixed; pointer-events: none; z-index: 100; opacity: 0.9; background: var(--card-bg); border: 1.5px solid var(--accent); padding: 8px; border-radius: 6px; color: var(--accent); font-size: 13px; }
-        #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        /* パレットのカードデザイン */
+        .source-card { 
+            padding: 8px 14px; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 6px; 
+            font-size: 13px; 
+            flex-shrink: 0; 
+            color: var(--text); 
+        }
+        
+        /* ドラック中のデザイン */
+        .dragging { 
+            position: fixed; pointer-events: none; z-index: 100; opacity: 0.9; 
+            background: var(--card-bg); border: 1px solid var(--accent); 
+            padding: 8px 14px; border-radius: 6px; color: var(--text); 
+            font-size: 13px; font-family: sans-serif;
+        }
+        
+        #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text); font-family: sans-serif; }
     </style>
 </head>
 <body>
@@ -86,9 +123,10 @@
 </div>
 
 <script>
+    // 【重要】ここにGASのウェブアプリURLを貼り付けてください
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxSYPoET92hYdTsW6u6YFTdUpLVMsoQnCH4_kjpMGkiogYLQs8WnZAmG0mRlZFkBFd31w/exec";
 
-    let dragItem = null, lastTap = 0, pressTimer = null, syncTimer = null;
+    let dragItem = null, lastTap = 0, syncTimer = null;
     const SLOT_H = () => document.querySelector('.time-slot').offsetHeight;
 
     function init() {
@@ -101,19 +139,64 @@
             cols[Math.floor(i / 12)]?.appendChild(slot);
             m === 0 ? m = 30 : (m = 0, h++);
         }
+        
+        // パレットからのドラッグ設定（シンプル化）
         document.querySelectorAll('.source-card').forEach(card => {
-            const start = (e) => pressTimer = setTimeout(() => startDrag(e, card.innerText), 200);
-            const cancel = () => clearTimeout(pressTimer);
-            ['touchstart','mousedown'].forEach(ev => card.addEventListener(ev, start));
-            ['touchend','mouseup','touchmove','mousemove'].forEach(ev => card.addEventListener(ev, cancel));
+            const start drag(e, label) {
+                const isT = e.type.includes('touch');
+                const mx = isT ? e.touches[0].pageX : e.pageX;
+                const my = isT ? e.touches[0].pageY : e.pageY;
+
+                dragItem = document.createElement('div');
+                dragItem.className = 'dragging'; dragItem.innerText = label;
+                dragItem.style.left = (mx - 40) + 'px'; dragItem.style.top = (my - 20) + 'px';
+                document.body.appendChild(dragItem);
+
+                const move = (ev) => {
+                    if(!dragItem) return;
+                    const ex = isT ? ev.touches[0].pageX : ev.pageX;
+                    const ey = isT ? ev.touches[0].pageY : ev.pageY;
+                    dragItem.style.left = (ex - 40) + 'px'; dragItem.style.top = (ey - 20) + 'px';
+                    if(isT && ev.cancelable) ev.preventDefault();
+                };
+
+                const end = (ev) => {
+                    const ex = isT ? ev.changedTouches[0].pageX : ev.pageX;
+                    const ey = isT ? ev.changedTouches[0].pageY : ev.pageY;
+                    const target = document.elementFromPoint(ex, ey)?.closest('.slot-content');
+                    
+                    // 被りチェックを厳密化。ターゲットのdata-indexを取得
+                    if (target) {
+                        const targetIdx = target.dataset.index;
+                        if (!isOccupied(targetIdx)) {
+                            createTaskCard(target, label, 1);
+                            sync();
+                        }
+                    }
+                    
+                    if(dragItem) dragItem.remove(); dragItem = null;
+                    window.removeEventListener(isT ? 'touchmove' : 'mousemove', move);
+                    window.removeEventListener(isT ? 'touchend' : 'mouseup', end);
+                };
+                
+                window.addEventListener(isT ? 'touchmove' : 'mousemove', move, {passive: false});
+                window.addEventListener(isT ? 'touchend' : 'mouseup', end);
+            };
+            
+            // タッチまたはクリックですぐにドラッグ開始（シンプル化）
+            card.addEventListener('touchstart', (e) => startDrag(e, card.innerText));
+            card.addEventListener('mousedown', (e) => startDrag(e, card.innerText));
         });
         loadData();
     }
 
-    function isOccupied(targetIndex, excludeCard = null) {
-        const targetSlot = document.querySelector(`[data-index="${targetIndex}"]`);
-        if (!targetSlot) return true;
-        return Array.from(targetSlot.children).some(child => child !== excludeCard);
+    // 被りチェック（シンプル化。伸ばした分も考慮）
+    function isOccupied(index) {
+        const slots = document.querySelectorAll('.slot-content');
+        for (let s of slots) {
+            if (s.dataset.index === String(index) && s.children.length > 0) return true;
+        }
+        return false;
     }
 
     function debounceSync() {
@@ -121,77 +204,48 @@
         syncTimer = setTimeout(sync, 1000);
     }
 
-    function startDrag(e, label, existingCard = null) {
-        const isT = e.type.includes('touch');
-        if (existingCard) existingCard.style.visibility = 'hidden';
-        dragItem = document.createElement('div');
-        dragItem.className = 'dragging'; dragItem.innerText = label;
-        document.body.appendChild(dragItem);
-
-        const move = (ev) => {
-            const mx = isT ? ev.touches[0].pageX : ev.pageX;
-            const my = isT ? ev.touches[0].pageY : ev.pageY;
-            dragItem.style.left = (mx - 30) + 'px'; dragItem.style.top = (my - 15) + 'px';
-            if(isT) ev.preventDefault();
-        };
-
-        const end = (ev) => {
-            const ex = isT ? ev.changedTouches[0].pageX : ev.pageX;
-            const ey = isT ? ev.changedTouches[0].pageY : ev.pageY;
-            const target = document.elementFromPoint(ex, ey)?.closest('.slot-content');
-            if (target && !isOccupied(target.dataset.index, existingCard)) {
-                if (existingCard) existingCard.remove();
-                createTaskCard(target, label, existingCard ? parseInt(existingCard.dataset.slots) : 1);
-            } else if (existingCard) existingCard.style.visibility = 'visible';
-            dragItem.remove(); dragItem = null;
-            window.removeEventListener(isT ? 'touchmove' : 'mousemove', move);
-            window.removeEventListener(isT ? 'touchend' : 'mouseup', end);
-            sync();
-        };
-        window.addEventListener(isT ? 'touchmove' : 'mousemove', move, {passive: false});
-        window.addEventListener(isT ? 'touchend' : 'mouseup', end);
-    }
-
+    // タスクカード作成
     function createTaskCard(parent, label, num) {
         const card = document.createElement('div');
         card.className = 'task-card'; card.innerText = label; card.dataset.slots = num;
-        card.style.height = `calc(${SLOT_H()}px * ${num} - 4px)`;
+        card.style.height = `calc(${SLOT_H()}px * ${num} - 3px)`; // 高さを微調整
 
-        const handleTap = (e) => {
+        // 削除機能：ダブルタップ（クリック）で削除にシンプル化
+        const handleDel = (e) => {
+            if (e.target.className.includes('handle-b')) return; // 伸ばすハンドルなら無視
             const now = Date.now();
-            if (now - lastTap < 300) { card.remove(); sync(); return; }
+            if (now - lastTap < 300) { card.remove(); sync(); return; } // ダブルタップ
             lastTap = now;
-            if (!e.target.className.includes('handle')) {
-                pressTimer = setTimeout(() => { if(!dragItem) startDrag(e, label, card); }, 200);
-            }
         };
-        card.addEventListener('mousedown', handleTap); card.addEventListener('touchstart', handleTap);
+        card.addEventListener('click', handleDel); card.addEventListener('touchend', handleDel);
 
-        const createResizer = (type) => {
-            const h = document.createElement('div'); h.className = 'handle-' + type;
+        // 伸ばすハンドル（下側のみ維持）
+        const createResizer = () => {
+            const h = document.createElement('div'); h.className = 'handle-b';
             const onStart = (e) => {
                 e.stopPropagation(); e.preventDefault();
                 const isT = e.type.includes('touch');
                 const startY = isT ? e.touches[0].pageY : e.pageY;
                 const startH = card.offsetHeight;
-                const startIdx = parseInt(card.parentElement.dataset.index);
+                
                 const onMove = (ev) => {
                     const my = isT ? ev.touches[0].pageY : ev.pageY;
                     const diff = my - startY;
-                    const slotDiff = Math.round(diff / SLOT_H());
-                    if (type === 'b') {
-                        const newS = Math.max(1, Math.round((startH + diff) / SLOT_H()));
-                        card.style.height = `calc(${SLOT_H()}px * ${newS} - 4px)`; card.dataset.slots = newS;
-                    } else {
-                        const newS = Math.max(1, Math.round((startH - diff) / SLOT_H()));
-                        const newIdx = startIdx + slotDiff;
-                        const target = document.querySelector(`[data-index="${newIdx}"]`);
-                        if (target && !isOccupied(newIdx, card)) {
-                            target.appendChild(card);
-                            card.style.height = `calc(${SLOT_H()}px * ${newS} - 4px)`; card.dataset.slots = newS;
-                        }
+                    // 下方向のみ、1コマ単位で伸ばす
+                    const newS = Math.max(1, Math.round((startH + diff) / SLOT_H()));
+                    
+                    // 被りチェック（伸ばす先に他のカードがないか）
+                    const startIdx = parseInt(card.parentElement.dataset.index);
+                    let canResize = true;
+                    for(let i=1; i<newS; i++){
+                        if(isOccupied(startIdx + i)) { canResize = false; break; }
+                    }
+                    
+                    if(canResize){
+                        card.style.height = `calc(${SLOT_H()}px * ${newS} - 3px)`; card.dataset.slots = newS;
                     }
                 };
+                
                 const onEnd = () => {
                     window.removeEventListener(isT ? 'touchmove' : 'mousemove', onMove);
                     window.removeEventListener(isT ? 'touchend' : 'mouseup', onEnd);
@@ -203,7 +257,7 @@
             h.addEventListener('mousedown', onStart); h.addEventListener('touchstart', onStart);
             return h;
         };
-        card.appendChild(createResizer('t')); card.appendChild(createResizer('b'));
+        card.appendChild(createResizer());
         parent.appendChild(card);
     }
 
@@ -228,7 +282,8 @@
             const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({method: 'load'}) });
             const data = await res.json();
             if (data.tasks) {
-                data.tasks.forEach(t => {
+                // インデックス順に並べ替えてからカードを作成（描画崩れ防止）
+                data.tasks.sort((a, b) => parseInt(a.idx) - parseInt(b.idx)).forEach(t => {
                     const p = document.querySelector(`[data-index="${t.idx}"]`);
                     if (p) createTaskCard(p, t.label, t.slots);
                 });
