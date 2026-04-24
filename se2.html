@@ -3,11 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Planner SE2 Final</title>
+    <title>Planner SE2 PWA</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <style>
         :root { 
             --bg: #121212; --card-bg: #2c2c2c; --border: #333333; 
             --text: #ffffff; --accent: #aaaaaa; --time-w: 32px; 
+            /* デフォルトの1コマの高さ */
+            --slot-h: 3.5vh; 
+        }
+
+        /* ホーム画面から「Webアプリ」として開かれた時の調整 */
+        @media screen and (display-mode: standalone) {
+            :root { --slot-h: 3.8vh; } /* バーが消えて広くなった分、1コマを少し伸ばして隙間を埋める */
         }
         
         html, body { 
@@ -22,11 +32,10 @@
             padding-top: env(safe-area-inset-top); box-sizing: border-box;
         }
         
-        /* 時間割エリア：隙間を最小限に */
         #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; padding: 1px; flex: 1 1 auto; overflow: hidden; }
         
-        /* SE2の高さに合わせて各コマを調整 */
-        .time-slot { height: 3.5vh; min-height: 26px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
+        /* 変数 --slot-h を使用 */
+        .time-slot { height: var(--slot-h); min-height: 26px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
         .time-label { width: var(--time-w); font-size: 9px; color: #888; display: flex; align-items: flex-start; padding: 1px 0 0 1px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
         .slot-content { flex: 1; position: relative; border-right: 1px solid var(--border); }
 
@@ -39,14 +48,12 @@
         }
         .handle-b { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; z-index: 20; background: rgba(255,255,255,0.05); }
 
-        /* 中間の不要な隙間を削除 */
         #input-area { padding: 2px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
         #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
         .field-set { display: flex; gap: 1px; border: 1px solid var(--border); padding: 1px; background: #1a1a1a; border-radius: 3px; }
         select, input, textarea { background: #222; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 10px; outline: none; }
         textarea { width: 100%; height: 30px; padding: 2px 4px; box-sizing: border-box; resize: none; }
 
-        /* パレット：SE2で切れないようコンパクトに配置 */
         #palette { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -54,25 +61,12 @@
             padding: 4px; 
             background: var(--bg); 
             border-top: 1px solid var(--border);
-            padding-bottom: calc(4px + env(safe-area-inset-bottom));
+            padding-bottom: calc(6px + env(safe-area-inset-bottom));
             flex-shrink: 0;
         }
-        .source-card { 
-            padding: 5px 0; 
-            background: var(--card-bg); 
-            border: 1px solid var(--border); 
-            border-radius: 4px; 
-            font-size: 11px; 
-            text-align: center;
-        }
+        .source-card { padding: 6px 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px; font-size: 11px; text-align: center; }
         
-        .dragging { 
-            position: fixed; pointer-events: none; z-index: 100; opacity: 0.9; 
-            background: var(--card-bg); border: 1px solid var(--accent); 
-            width: 50px; height: 22px; display: flex; align-items: center; justify-content: center;
-            border-radius: 4px; color: var(--text); font-size: 10px;
-        }
-        
+        .dragging { position: fixed; pointer-events: none; z-index: 100; opacity: 0.9; background: var(--card-bg); border: 1px solid var(--accent); width: 50px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: var(--text); font-size: 10px; }
         #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text); }
     </style>
 </head>
@@ -97,9 +91,7 @@
 </div>
 
 <script>
-    // 【重要】ここにGASのウェブアプリURLを貼り付けてください
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxSYPoET92hYdTsW6u6YFTdUpLVMsoQnCH4_kjpMGkiogYLQs8WnZAmG0mRlZFkBFd31w/exec";
-
     let dragItem = null, lastTap = 0, syncTimer = null;
     const SLOT_H = () => document.querySelector('.time-slot').offsetHeight;
 
@@ -113,118 +105,39 @@
             cols[Math.floor(i / 12)]?.appendChild(slot);
             m === 0 ? m = 30 : (m = 0, h++);
         }
-        
         document.querySelectorAll('.source-card').forEach(card => {
             const startDrag = (e, label) => {
                 const isT = e.type.includes('touch');
-                const mx = isT ? e.touches[0].pageX : e.pageX;
-                const my = isT ? e.touches[0].pageY : e.pageY;
-                dragItem = document.createElement('div');
-                dragItem.className = 'dragging'; dragItem.innerText = label;
-                dragItem.style.left = (mx - 25) + 'px'; dragItem.style.top = (my - 11) + 'px';
-                document.body.appendChild(dragItem);
-                const move = (ev) => {
-                    if(!dragItem) return;
-                    const ex = isT ? ev.touches[0].pageX : ev.pageX;
-                    const ey = isT ? ev.touches[0].pageY : ev.pageY;
-                    dragItem.style.left = (ex - 25) + 'px'; dragItem.style.top = (ey - 11) + 'px';
-                    if(isT && ev.cancelable) ev.preventDefault();
-                };
-                const end = (ev) => {
-                    const ex = isT ? ev.changedTouches[0].pageX : ev.pageX;
-                    const ey = isT ? ev.changedTouches[0].pageY : ev.pageY;
-                    const target = document.elementFromPoint(ex, ey)?.closest('.slot-content');
-                    if (target && target.children.length === 0) {
-                        createTaskCard(target, label, 1);
-                        sync();
-                    }
-                    if(dragItem) dragItem.remove(); dragItem = null;
-                    window.removeEventListener(isT ? 'touchmove' : 'mousemove', move);
-                    window.removeEventListener(isT ? 'touchend' : 'mouseup', end);
-                };
-                window.addEventListener(isT ? 'touchmove' : 'mousemove', move, {passive: false});
-                window.addEventListener(isT ? 'touchend' : 'mouseup', end);
+                const mx = isT ? e.touches[0].pageX : e.pageX; const my = isT ? e.touches[0].pageY : e.pageY;
+                dragItem = document.createElement('div'); dragItem.className = 'dragging'; dragItem.innerText = label;
+                dragItem.style.left = (mx - 25) + 'px'; dragItem.style.top = (my - 11) + 'px'; document.body.appendChild(dragItem);
+                const move = (ev) => { if(!dragItem) return; const ex = isT ? ev.touches[0].pageX : ev.pageX; const ey = isT ? ev.touches[0].pageY : ev.pageY; dragItem.style.left = (ex - 25) + 'px'; dragItem.style.top = (ey - 11) + 'px'; if(isT && ev.cancelable) ev.preventDefault(); };
+                const end = (ev) => { const ex = isT ? ev.changedTouches[0].pageX : ev.pageX; const ey = isT ? ev.touches[0].pageY : ev.pageY; const target = document.elementFromPoint(ex, ey)?.closest('.slot-content'); if (target && target.children.length === 0) { createTaskCard(target, label, 1); sync(); } if(dragItem) dragItem.remove(); dragItem = null; window.removeEventListener(isT ? 'touchmove' : 'mousemove', move); window.removeEventListener(isT ? 'touchend' : 'mouseup', end); };
+                window.addEventListener(isT ? 'touchmove' : 'mousemove', move, {passive: false}); window.addEventListener(isT ? 'touchend' : 'mouseup', end);
             };
-            card.addEventListener('touchstart', (e) => startDrag(e, card.innerText));
-            card.addEventListener('mousedown', (e) => startDrag(e, card.innerText));
+            card.addEventListener('touchstart', (e) => startDrag(e, card.innerText)); card.addEventListener('mousedown', (e) => startDrag(e, card.innerText));
         });
         loadData();
     }
 
-    function debounceSync() {
-        clearTimeout(syncTimer);
-        syncTimer = setTimeout(sync, 1000);
-    }
-
+    function debounceSync() { clearTimeout(syncTimer); syncTimer = setTimeout(sync, 1000); }
     function createTaskCard(parent, label, num) {
-        const card = document.createElement('div');
-        card.className = 'task-card'; card.innerText = label; card.dataset.slots = num;
+        const card = document.createElement('div'); card.className = 'task-card'; card.innerText = label; card.dataset.slots = num;
         card.style.height = `calc(${SLOT_H()}px * ${num} - 2px)`;
-        const handleDel = (e) => {
-            if (e.target.className.includes('handle-b')) return;
-            const now = Date.now();
-            if (now - lastTap < 300) { card.remove(); sync(); return; }
-            lastTap = now;
-        };
+        const handleDel = (e) => { if (e.target.className.includes('handle-b')) return; const now = Date.now(); if (now - lastTap < 300) { card.remove(); sync(); return; } lastTap = now; };
         card.addEventListener('click', handleDel); card.addEventListener('touchend', handleDel);
         const h = document.createElement('div'); h.className = 'handle-b';
         h.addEventListener('touchstart', (e) => {
-            e.stopPropagation(); e.preventDefault();
-            const startY = e.touches[0].pageY;
-            const startH = card.offsetHeight;
-            const move = (ev) => {
-                const newS = Math.max(1, Math.round((startH + (ev.touches[0].pageY - startY)) / SLOT_H()));
-                const startIdx = parseInt(card.parentElement.dataset.index);
-                let can = true;
-                for(let i=1; i<newS; i++){
-                    const next = document.querySelector(`[data-index="${startIdx + i}"]`);
-                    if(!next || next.children.length > 0) { can = false; break; }
-                }
-                if(can){ card.style.height = `calc(${SLOT_H()}px * ${newS} - 2px)`; card.dataset.slots = newS; }
-            };
+            e.stopPropagation(); e.preventDefault(); const startY = e.touches[0].pageY; const startH = card.offsetHeight;
+            const move = (ev) => { const newS = Math.max(1, Math.round((startH + (ev.touches[0].pageY - startY)) / SLOT_H())); const startIdx = parseInt(card.parentElement.dataset.index); let can = true; for(let i=1; i<newS; i++){ const next = document.querySelector(`[data-index="${startIdx + i}"]`); if(!next || next.children.length > 0) { can = false; break; } } if(can){ card.style.height = `calc(${SLOT_H()}px * ${newS} - 2px)`; card.dataset.slots = newS; } };
             const end = () => { window.removeEventListener('touchmove', move); window.removeEventListener('touchend', end); sync(); };
             window.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', end);
         });
         card.appendChild(h); parent.appendChild(card);
     }
 
-    async function sync() {
-        const payload = {
-            method: 'save',
-            data: {
-                tasks: Array.from(document.querySelectorAll('.task-card')).map(c => ({
-                    idx: c.parentElement.dataset.index, label: c.innerText, slots: c.dataset.slots
-                })),
-                fields: Array.from(document.querySelectorAll('.field-set')).map(fs => ({
-                    s: fs.querySelector('select').value, t: fs.querySelector('input').value
-                })),
-                memo: document.getElementById('memo').value
-            }
-        };
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(console.error);
-    }
-
-    async function loadData() {
-        try {
-            const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({method: 'load'}) });
-            const data = await res.json();
-            if (data.tasks) {
-                data.tasks.sort((a,b)=>a.idx-b.idx).forEach(t => {
-                    const p = document.querySelector(`[data-index="${t.idx}"]`);
-                    if (p) createTaskCard(p, t.label, t.slots);
-                });
-            }
-            if (data.fields) {
-                document.querySelectorAll('.field-set').forEach((fs, i) => {
-                    if (data.fields[i]) {
-                        fs.querySelector('select').value = data.fields[i].s;
-                        fs.querySelector('input').value = data.fields[i].t;
-                    }
-                });
-            }
-            document.getElementById('memo').value = data.memo || "";
-        } catch (e) { console.error(e); } finally { document.getElementById('loader').style.display = 'none'; }
-    }
+    async function sync() { const payload = { method: 'save', data: { tasks: Array.from(document.querySelectorAll('.task-card')).map(c => ({ idx: c.parentElement.dataset.index, label: c.innerText, slots: c.dataset.slots })), fields: Array.from(document.querySelectorAll('.field-set')).map(fs => ({ s: fs.querySelector('select').value, t: fs.querySelector('input').value })), memo: document.getElementById('memo').value } }; await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(console.error); }
+    async function loadData() { try { const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({method: 'load'}) }); const data = await res.json(); if (data.tasks) { data.tasks.sort((a,b)=>a.idx-b.idx).forEach(t => { const p = document.querySelector(`[data-index="${t.idx}"]`); if (p) createTaskCard(p, t.label, t.slots); }); } if (data.fields) { document.querySelectorAll('.field-set').forEach((fs, i) => { if (data.fields[i]) { fs.querySelector('select').value = data.fields[i].s; fs.querySelector('input').value = data.fields[i].t; } }); } document.getElementById('memo').value = data.memo || ""; } catch (e) { console.error(e); } finally { document.getElementById('loader').style.display = 'none'; } }
     window.onload = init;
 </script>
 </body>
