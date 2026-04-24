@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Planner SE2 PWA</title>
+    <title>Planner SE2 Final</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
@@ -11,13 +11,8 @@
         :root { 
             --bg: #121212; --card-bg: #2c2c2c; --border: #333333; 
             --text: #ffffff; --accent: #aaaaaa; --time-w: 32px; 
-            /* デフォルトの1コマの高さ */
-            --slot-h: 3.5vh; 
-        }
-
-        /* ホーム画面から「Webアプリ」として開かれた時の調整 */
-        @media screen and (display-mode: standalone) {
-            :root { --slot-h: 3.8vh; } /* バーが消えて広くなった分、1コマを少し伸ばして隙間を埋める */
+            /* 1コマの高さを「固定」することでズレを防止 */
+            --slot-h: 27px; 
         }
         
         html, body { 
@@ -28,14 +23,14 @@
         
         #container { 
             display: flex; flex-direction: column; height: 100vh; 
-            height: -webkit-fill-available; position: relative; 
+            height: -webkit-fill-available;
             padding-top: env(safe-area-inset-top); box-sizing: border-box;
         }
         
-        #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; padding: 1px; flex: 1 1 auto; overflow: hidden; }
+        /* 時間割エリア：固定高さを維持 */
+        #main-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; padding: 1px; flex-shrink: 0; }
         
-        /* 変数 --slot-h を使用 */
-        .time-slot { height: var(--slot-h); min-height: 26px; border-bottom: 1px solid var(--border); display: flex; position: relative; }
+        .time-slot { height: var(--slot-h); border-bottom: 1px solid var(--border); display: flex; position: relative; }
         .time-label { width: var(--time-w); font-size: 9px; color: #888; display: flex; align-items: flex-start; padding: 1px 0 0 1px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); flex-shrink: 0; }
         .slot-content { flex: 1; position: relative; border-right: 1px solid var(--border); }
 
@@ -46,25 +41,25 @@
             display: flex; align-items: center; justify-content: center; 
             color: var(--text); touch-action: none; user-select: none;
         }
-        .handle-b { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; z-index: 20; background: rgba(255,255,255,0.05); }
+        .handle-b { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; z-index: 20; }
 
-        #input-area { padding: 2px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
-        #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+        /* 入力エリア：flex: 1 にすることで、余った隙間をすべて吸収します */
+        #input-area { padding: 2px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0; }
+        #fixed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; flex-shrink: 0; }
         .field-set { display: flex; gap: 1px; border: 1px solid var(--border); padding: 1px; background: #1a1a1a; border-radius: 3px; }
-        select, input, textarea { background: #222; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 10px; outline: none; }
-        textarea { width: 100%; height: 30px; padding: 2px 4px; box-sizing: border-box; resize: none; }
+        select, input { background: #222; color: var(--text); border: 1px solid var(--border); border-radius: 2px; font-size: 10px; height: 18px; outline: none; }
+        
+        /* メモ欄が伸び縮みして画面を埋める */
+        textarea { width: 100%; flex: 1; background: #222; color: var(--text); border: 1px solid var(--border); border-radius: 4px; font-size: 11px; padding: 4px; box-sizing: border-box; resize: none; min-height: 25px; }
 
+        /* パレット：最下部に固定 */
         #palette { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 3px; 
-            padding: 4px; 
-            background: var(--bg); 
-            border-top: 1px solid var(--border);
-            padding-bottom: calc(6px + env(safe-area-inset-bottom));
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 4px; 
+            background: var(--bg); border-top: 1px solid var(--border);
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
             flex-shrink: 0;
         }
-        .source-card { padding: 6px 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px; font-size: 11px; text-align: center; }
+        .source-card { padding: 8px 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px; font-size: 11px; text-align: center; }
         
         .dragging { position: fixed; pointer-events: none; z-index: 100; opacity: 0.9; background: var(--card-bg); border: 1px solid var(--accent); width: 50px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: var(--text); font-size: 10px; }
         #loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text); }
@@ -78,9 +73,7 @@
     </div>
     <div id="input-area">
         <div id="fixed-fields">
-            <script>
-                for(let i=0; i<4; i++) document.write(`<div class="field-set"><select onchange="sync()"><option value=""></option><option>出発</option><option>料理</option><option>就寝</option><option>1階へ</option></select><input type="time" onchange="sync()"></div>`);
-            </script>
+            <script>for(let i=0; i<4; i++) document.write(`<div class="field-set"><select onchange="sync()"><option value=""></option><option>出発</option><option>料理</option><option>就寝</option><option>1階へ</option></select><input type="time" onchange="sync()"></div>`);</script>
         </div>
         <textarea id="memo" oninput="debounceSync()" placeholder="メモ..."></textarea>
     </div>
